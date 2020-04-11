@@ -1,0 +1,96 @@
+---
+title: "Single-Tailed t-tests"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+
+sons <- read.csv("all_sons_R2_altered.csv")
+medial_sons <- filter(sons, final == FALSE)
+```
+
+
+```{r}
+t.test(ms~fortis, mu=0, alt="less", conf=0.95, var.eq=F, paired=F, data = medial_sons)
+```
+help(t.test)
+```{r}
+fl_name_list <- c("lenis", "fortis")
+
+boxplot(ms~fortis, xlab = "Sonorants: Lenis vs Fortis", ylab = "Duration(ms)", names = fl_name_list, col = "blue", data = medial_sons)
+  
+
+```
+```{r}
+###fortis/lenis word final
+final_sons <- filter(sons, final == TRUE)
+
+t.test(ms~fortis, mu=0, alt="less", conf=0.95, var.eq=F, paired=F, data = final_sons)
+```
+```{r}
+boxplot(ms~fortis, xlab = "Sonorants: Lenis vs Fortis", ylab = "Duration(ms)", names = fl_name_list, col = "blue", data = final_sons)
+```
+```{r}
+#voiceless vs voiced: medial and final
+
+stops <- read.csv("all_stops_R2.csv") 
+
+medial_stops <- filter(stops, final == FALSE)
+
+t.test(ms~voiced, mu=0, alt="greater", conf=0.95, var.eq=F, paired=F, data = medial_stops)
+```
+```{r}
+
+stop_name_list <- c("[-voice]", "[+voice]")
+
+boxplot(ms~voiced, xlab = "Stops: Voiceless vs Voiced", ylab = "Duration(ms)", names = stop_name_list, col = "blue", data = medial_stops)
+```
+```{r}
+final_stops <- filter(stops, final == TRUE)
+
+t.test(ms~voiced, mu=0, alt="greater", conf=0.95, var.eq=F, paired=F, data = final_stops)
+```
+```{r}
+boxplot(ms~voiced, xlab = "Stops: Voiceless vs Voiced", ylab = "Duration(ms)", names = stop_name_list, col = "blue", data = final_stops)
+```
+```{r}
+final_voiced_stops <- filter(final_stops, voiced == TRUE)
+
+t.test(ms~long, mu=0, alt="greater", conf=0.95, var.eq=F, paired=F, data = final_voiced_stops)
+
+```
+```{r}
+vowel_lengths_labs <- c("short", "long")
+
+boxplot(ms~long, xlab = "Voiced Stop, Word Final, Effect of Preceding Vowel, short vs long", ylab = "Duration(ms)", names = vowel_lengths_labs, col = "blue", data = final_voiced_stops)
+```
+```{r}
+medial_voiceless_stops <- filter(medial_stops, voiced == FALSE)
+
+t.test(ms~long, mu=0, alt="greater", conf=0.95, var.eq=F, paired=F, data = medial_voiceless_stops)
+```
+```{r}
+boxplot(ms~long, xlab = "Voiceless Stop, Word Medial, Effect of Preceding Vowel, short vs long", ylab = "Duration(ms)", names = vowel_lengths_labs, col = "blue", data = medial_voiceless_stops)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
