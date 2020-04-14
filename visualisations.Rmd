@@ -1,0 +1,70 @@
+---
+title: "Visualisations"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+theme_set(theme_bw())
+
+master_data %>%
+  filter(Manner == "Stop") %>%
+  ggplot(aes(LongV, Duration, fill = Final)) +
+  facet_wrap(vars(Voiceless),
+             labeller = as_labeller(c(`FALSE` = "Voiced",
+                                      `TRUE` = "Voiceless"))) +
+  geom_violin(alpha = 0.3) +
+  geom_boxplot(alpha = 0.5) +
+  scale_x_discrete(name = "Vowel length", labels = c("Short", "Long")) +
+  scale_fill_brewer(name = "Position", labels = c("Medial", "Final"), palette = "Set1") +
+  ggtitle("Stops")
+
+master_data %>%
+  filter(Manner == "Sonorant") %>%
+  ggplot(aes(LongV, Duration, fill = Final)) +
+  facet_wrap(vars(Fortis),
+             labeller = as_labeller(c(`FALSE` = "Lenis",
+                                      `TRUE` = "Fortis"))) +
+  geom_violin(alpha = .3) +
+  geom_boxplot(alpha = .5) + 
+  scale_x_discrete(name = "Vowel length", labels= c("Short", "Long")) +
+  scale_fill_brewer(name = "Position", labels = c("Medial", "Final"), palette = "Set1") +
+  ggtitle("Sonorants")
+```
+```{r}
+library(gghalves)
+```
+
+
+
+```{r}
+
+master_data %>%
+  filter(Manner == "Stop") %>%
+  ggplot(aes(LongV, Duration, fill = Final)) +
+  facet_wrap(vars(Voiceless),
+             labeller = as_labeller(c(`FALSE` = "Voiced",
+                                      `TRUE` = "Voiceless"))) +
+  geom_half_violin(side = "l") +
+  geom_half_boxplot(side = "r") +
+  scale_x_discrete(name = "Vowel length", labels = c("Short", "Long")) +
+  scale_fill_brewer(name = "Position", labels = c("Medial", "Final"), palette = "Set1") +
+  ggtitle("Stops")
+
+master_data %>%
+  filter(Manner == "Sonorant") %>%
+  ggplot(aes(LongV, Duration, fill = Final)) +
+  facet_wrap(vars(Fortis),
+             labeller = as_labeller(c(`FALSE` = "Lenis",
+                                      `TRUE` = "Fortis"))) +
+  geom_half_violin(side = "l") +
+  geom_half_boxplot(side = "r") + 
+  scale_x_discrete(name = "Vowel length", labels= c("Short", "Long")) +
+  scale_fill_brewer(name = "Position", labels = c("Medial", "Final"), palette = "Set1") +
+  ggtitle("Sonorants")
+```
+
