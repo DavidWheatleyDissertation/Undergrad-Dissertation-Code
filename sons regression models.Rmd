@@ -1,0 +1,109 @@
+---
+title: "sons regression models"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+sons_data <- master_data %>%
+  filter(Manner == "Sonorant")
+
+fit0 <- lm(Duration ~ Fortis + Final, data = sons_data)
+
+summary(fit0)
+```
+Fortis gives 31 longer 
+Final gives 15 longer
+Both have low p numbers so seem reliable
+
+```{r}
+fit1 <- lm(Duration ~ Fortis * Final, data = sons_data)
+
+summary(fit1)
+```
+interesting changes when interaction of fortis and finality considered:
+
+the effect of fortis is reduced (20 rather than 31), and effect of finality profoundly reduced (7 rather than 15, with a high p number: ~0.03) 
+
+the interaction fortis * final seems to have a large effect (25, with a low p-number)
+```{r}
+fit2 <- lm(Duration ~ Fortis * Final + LongV, data = sons_data)
+summary(fit2)
+```
+when the preceding vowel length is taken into account (additive model) there is a simiar effect for fortis (19, with a low p-number), and for fortis (8 with a high p-number). The vowel does not seem to have an effect in this model (p number > 0.2).
+
+Again the interaction of fortis*final has a significant effect (24 with a low p-number)
+
+```{r}
+fit3 <- lm(Duration ~ Fortis * Final + LongV + LongV:Final, data = sons_data)
+summary(fit3)
+```
+This model reiterates that fortis has a signifcant lengthening effect (19 with a low p-number) but final, in this model, does not (5 with a high p-number, > 0.2). preceding vowel length, as expected, has no significant effect (small negative, as in fit 2, with p > 0.1). 
+
+Again, the interaction of final and fortis has a significant effect: 27 with a low p-number
+
+
+
+```{r}
+fit4 <- lm(Duration ~ Fortis * Final + LongV + LongV:Final + LongV:Fortis, data = sons_data)
+summary(fit4)
+```
+confirmed from previous models:
+
+effect of fortis (19 low p-number)
+no effect of final (5, p > 0.2)
+no effect of long (-6, p > 0.1)
+effect of fortis*final interaction (27, low p number)
+
+New:
+
+no effect of final*long interaction (~7, p ~ 0.3)
+no effect of fortis*long interaction (0.2, p ~ 1 )
+
+```{r}
+fit5 <- lm(Duration ~ Fortis * Final * LongV, data = sons_data)
+summary(fit5)
+
+```
+confirmed: 
+
+fortis effect (19, low p)
+no final effect (5, p ~ 0.2)
+no preceding vowel effect (-5, p ~ 0.2)
+fortis*final interaction effect (25, low p)
+no effect of fortis*long interaction (-3, p ~ 0.75 )
+no effect of final*long interaction (~5.5, p ~ 0.4)
+
+New:
+
+no effect of fortis*final*long (12, p ~ 0.5)
+
+
+```{r}
+AICc(fit0, fit1, fit2, fit3, fit4, fit5)
+```
+fit1 seems to be the 'best' model according to the AICc number
+
+
+```{r}
+random_fit <- lmer(Duration ~ Fortis * Final + LongV + (1|Word), data = sons_data)
+
+summary(random_fit)
+
+```
+```{r}
+random_fit0 <- lmer(Duration ~ Fortis * Final + (1|Word), data = sons_data)
+summary(random_fit0)
+```
+```{r}
+random_fit1 <- lmer(Duration ~ Fortis * Final + LongV + LongV:Final + (1|Word), data = sons_data)
+summary(random_fit1)
+```
+
+
+```{r}
+anova(random_fit, random_fit0, random_fit1, test = "Chisq")
+```
+
