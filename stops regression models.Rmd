@@ -1,0 +1,32 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+stops_data <- master_data %>%
+  filter(Manner == "Stop")
+
+fit0 <- lm(Duration ~ Voiceless + Final, data = stops_data)
+fit1 <- lm(Duration ~ Voiceless * Final, data = stops_data)
+fit2 <- lm(Duration ~ Voiceless * Final + LongV, data = stops_data)
+fit3 <- lm(Duration ~ Voiceless * Final + LongV + LongV:Final, data = stops_data)
+fit4 <- lm(Duration ~ Voiceless * Final + LongV + LongV:Final + LongV:Voiceless, data = stops_data)
+fit5 <- lm(Duration ~ Voiceless * Final * LongV, data = stops_data)
+
+summary(fit0)
+summary(fit1)
+summary(fit2)
+summary(fit3)
+summary(fit4)
+summary(fit5)
+AICc(fit0, fit1, fit2, fit3, fit4, fit5)
+
+
+```
+
