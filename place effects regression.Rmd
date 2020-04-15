@@ -1,0 +1,97 @@
+---
+title: "Place effects"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+master_data <- read_csv("all_segs.csv") %>%
+  mutate(Final = Position == "Final",
+         LongV = Long.Short == "long",
+         Duration = Duration * 1000,
+         Manner = case_when(
+           Seg %in% c("n", "l") ~ "Sonorant",
+           Seg %in% c("s", "ss") ~ "Fricative",
+           Seg == "m" ~ "Labial nasal",
+           TRUE ~ "Stop"),
+         Voiceless = Seg %in% c("p", "t", "k", "s", "ss"),
+         id = paste(File, Seg, Duration_in_ms, sep = "")) %>%
+  select(-Duration_in_ms, -Long.Short, -Position)
+
+sonorants <- master_data %>%
+  filter(Manner == "Sonorant") %>%
+  mutate(Fortis = str_detect(Word, "^[^aeiouáéíóú]*[aeiouáéíóú]+(nn|ll)"))
+
+master_data <- master_data %>%
+  left_join(sonorants)
+```
+
+```{r}
+stops_data <- master_data %>%
+  filter(Manner == "Stop")
+
+fit0 <- lm(Duration ~ Seg + Final, data = stops_data)
+summary(fit0)
+```
+#so, as you'd expect: with /b/ as the starting point, we see no sig. dif. for the other voiced stops: /d/ and /g/, and large increases in duration for the voiceless stops, /k/ , /p/, /t/, as well as a significant finality effect
+
+
+
+```{r}
+fit1 <- lm(Duration ~ Seg * Final, data = stops_data)
+summary(fit1)
+```
+#in this model, the interaction between each segment and finality is examined: we see similar but slightly reduced increased duration for the voiceless stops. Finality no longer shows a sig. effect (p ~ 0.4). The only sig. interaction effect seems to be for /k/ and final postion (112.289, p < 0.001)
+
+```{r}
+fit2 <- lm(Duration ~ Seg * Final + LongV, data = stops_data)
+summary(fit2)
+```
+#Now, with the addition of preceding long vowel, we see no sig effect (LongVTRUE = -8.462, p > 0.5)
+
+```{r}
+fit3 <- lm(Duration ~ Seg * Final + LongV + LongV:Final, data = stops_data)
+summary(fit3)
+```
+#This model seems promising, as we see the same lengthening for all three voiceless stops, none for voiced stops. 
+#Also, no sig. effect for finality alone, or for long vowel, but again a sig. interction between /k/ and finality.
+#with the addition of the interaction of finality and preceding long vowel, we see a marginally sig.effect (FinalTRUE:LongVTRUE: -23.2262, p ~ 0.035) 
+
+```{r}
+fit4 <- lm(Duration ~  Seg * Final + LongV + LongV:Final + LongV:Seg, data = stops_data)
+summary(fit4)
+```
+```{r}
+fit5 <- lm(Duration ~ Seg * Final * LongV, data = stops_data)
+summary(fit5)
+```
+```{r}
+AICc(fit0, fit1, fit2, fit3, fit4, fit5)
+```
+fit3 seems to be the best model
+
+```{r}
+stops_short <- filter(stops_data, LongV == FALSE)
+stops_short_marked <- mutate(stops_short, ShortV = TRUE)
+stops_long <- filter(stops_data, LongV == TRUE)
+stops_long_marked <- mutate(stops_long, ShortV = FALSE)
+stops_short_column <- rbind(stops_short_marked, stops_long_marked)
+```
+
+```{r}
+fit6 <- lm(Duration ~ Seg * Final + ShortV + ShortV:Final, data = stops_short_column)
+summary(fit6)
+```
+```{r}
+AICc(fit6)
+```
+```{r}
+fit7 <- lm(Duration ~ Seg * Final * ShortV, data = stops_short_column)
+summary(fit7)
+```
+```{r}
+AICc(fit7)
+```
+#this model was an attempt to look at the interaction of each segment and final position and a preceding short vowel individually. The model seems to have become quiet convoluted though. the only extra sig. effect is of d and short vowel, which is actually shorter in duration (-44, p ~ 0.015)
